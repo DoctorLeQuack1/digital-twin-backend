@@ -1,9 +1,7 @@
 import { Router } from 'express';
+import auth from './auth.js';
 const router = Router();
 
-// import apiRoutes from './api/index.ts';
-router.get('/api/test/', (req, res) => {
-    res.json({ message: 'CORS funciona!' })});
-// router.use('/api', apiRoutes);
+router.use('/auth', auth);
 
 export default router;
