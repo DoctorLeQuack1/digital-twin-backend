@@ -26,7 +26,7 @@ app.use(routes);
 const db_connection = async () => {
   try {
     await sequelize.sync({});
-    console.log(`Successfully connected to ${process.env.DB_NAME} database...`);
+    console.log(`Successfully connected to digtal_twin_db database...`);
   } catch (error) {
     console.error(`Unable to connect to the data base. Error: ${error}`)
   }
