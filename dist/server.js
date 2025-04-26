@@ -9,7 +9,7 @@ const app = express();
 const PORT = 3001;
 // Permitir solo tu frontend
 app.use(cors({
-    origin: 'http://localhost:5173', // <-- Cambia esto según dónde corra tu frontend
+    origin: 'https://woof-quest.web.app', // <-- Cambia esto según dónde corra tu frontend
     credentials: true // Si vas a enviar cookies o headers de autenticación
 }));
 // Otros middlewares
