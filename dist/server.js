@@ -20,7 +20,7 @@ app.use(routes);
 // Rutas de ejemplo
 const db_connection = async () => {
     try {
-        await sequelize.sync({ force: true });
+        await sequelize.sync({});
         console.log(`Successfully connected to ${process.env.DB_NAME} database...`);
     }
     catch (error) {

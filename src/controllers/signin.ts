@@ -1,35 +1,49 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/index.js'; // Asegúrate de importar bien
+import { User, Asset } from '../models/index.js'; // Asegúrate de importar bien
 import dotenv from 'dotenv';
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || '';
+const num = Math.floor(Math.random() * 5);
+
+
+const asset_list = ["https://storage.googleapis.com/digital_twin_assets/Computer.glb",
+    "https://storage.googleapis.com/digital_twin_assets/DeaverHouse.glb",
+    "https://storage.googleapis.com/digital_twin_assets/Factory.glb",
+    "https://storage.googleapis.com/digital_twin_assets/Vancouver.glb",
+    "https://storage.googleapis.com/digital_twin_assets/camping.glb"]
 
 export const signin = async (req: any, res: any) => {
 
     try {
-            const { user_name, user_lastname, email, password, asset_link } = req.body;
-            // ¿Ya existe ese email?
-            const existingUser = await User.findOne({ where: { email } });
-            if (existingUser) {
-                return res.status(400).json({ message: 'Email already registered' });
-            }
+        const { user_name, user_lastname, email, password } = req.body;
+        // ¿Ya existe ese email?
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email already registered' });
+        }
 
-            // Hashear la contraseña
-            const hashedPassword = await bcrypt.hash(password, 10);
+        // Hashear la contraseña
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-            // Crear el usuario
-            const newUser = await User.create({
-                user_name,
-                user_lastname,
-                email,
-                password: hashedPassword,
-            });
+        // Crear el usuario
+        const newUser = await User.create({
+            user_name,
+            user_lastname,
+            email,
+            password: hashedPassword,
+        });
 
-            const token = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: '1h' });
+        // Crear un valor en la tabla con el id del usuario
+        const newAsset = await Asset.create({
+            user_id: newUser.id,
+            asset_link: asset_list[num]
+        });
 
-            res.status(201).json({ message: 'User created successfully', token });
+        const token = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.status(201).json({ message: 'User created successfully', token, user_email: email, user_name: user_name, user_last_name: user_lastname });
 
     } catch (err: any) {
         res.status(500).json({ message: 'Server error', error: err.message });
