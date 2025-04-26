@@ -25,7 +25,7 @@ app.use(routes);
 
 const db_connection = async () => {
   try {
-    await sequelize.sync({ });
+    await sequelize.sync({});
     console.log(`Successfully connected to ${process.env.DB_NAME} database...`);
   } catch (error) {
     console.error(`Unable to connect to the data base. Error: ${error}`)

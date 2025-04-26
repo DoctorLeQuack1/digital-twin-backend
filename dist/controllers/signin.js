@@ -4,13 +4,14 @@ import { User, Asset } from '../models/index.js'; // Asegúrate de importar bien
 import dotenv from 'dotenv';
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || '';
-const num = Math.floor(Math.random() * 5);
 const asset_list = ["https://storage.googleapis.com/digital_twin_assets/Computer.glb",
     "https://storage.googleapis.com/digital_twin_assets/DeaverHouse.glb",
     "https://storage.googleapis.com/digital_twin_assets/Factory.glb",
     "https://storage.googleapis.com/digital_twin_assets/Vancouver.glb",
     "https://storage.googleapis.com/digital_twin_assets/camping.glb"];
 export const signin = async (req, res) => {
+    const num = Math.floor(Math.random() * 5);
+    console.log(`This is the num: ${num}`);
     try {
         const { user_name, user_lastname, email, password } = req.body;
         // ¿Ya existe ese email?
