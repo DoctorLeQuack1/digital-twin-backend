@@ -1,66 +1,57 @@
-import {
-  Model,
-  type InferAttributes,
-  type InferCreationAttributes,
-  type CreationOptional,
-  DataTypes,
-  type Sequelize,
-} from 'sequelize';
+import { Schema, model, type Document } from 'mongoose';
+import bcrypt from 'bcrypt'
 
 
-export class User extends Model<
-  InferAttributes<User>,
-  InferCreationAttributes<User>
-> {
-  declare id: CreationOptional<number>;
-  declare user_name: string;
-  declare user_lastname : string;
-  declare email: string;
-  declare password: string;
-}
+export interface IUsers extends Document {
+    email: string;
+    password: string;
+    name: string;
+    last_name: string;
+    asset: string;
+    isCorrectPassword(password: string): Promise<boolean>
+};
 
-export function UserFactory(sequelize: Sequelize) {
-  User.init(
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      user_name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      user_lastname: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
+const usersSchema = new Schema<IUsers>({
+    email: {
+        type: String,
+        required: true,
         unique: true,
-        validate: {
-          isEmail: true,
-        },
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: {
-            msg: 'Please enter a password',
-          },
-        },
-      },
+        match: [/.+@.+\..+/, 'Must match an email address!'],
     },
-    {
-      sequelize,
-      timestamps: false,
-      underscored: true,
-      modelName: 'users',
-      tableName: 'users'
+    password: {
+        type: String,
+        required: true,
+        minlength: 5
+    },
+    name: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    last_name: {
+        type: String,
+        required: true
+    },
+    asset: {
+        type: String,
+        trim: true
     }
-  );
+});
 
-  return User;
+// pre save middleware
+usersSchema.pre<IUsers>('save', async function (next) {
+    if (this.isNew || this.isModified('password')) {
+        const saltRounds = 10;
+        this.password = await bcrypt.hash(this.password, saltRounds)
+    }
+    next();
+});
+
+// compare the incoming password with the hashed one
+usersSchema.methods.isCorrectPassword = async function (password: string): Promise<boolean> {
+    return await bcrypt.compare(password, this.password)
 }
+
+const Users = model<IUsers>('users', usersSchema);
+
+export default Users

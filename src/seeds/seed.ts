@@ -1,16 +1,25 @@
-import db from "../config/connection.js";
-import models from "../models/index.js";
+import db from "../config/connections.js";
+import { Users } from "../models/index.js";
 import cleanDB from "./cleanDB.js";
 
-const { Tech } = models;
-
-import techData from './techData.json' with { type: "json" };
+import usersData from './usersData.json' with { type: "json" };
 
 db.once('open', async () => {
-  await cleanDB('Tech', 'teches');
+  try {
+    await cleanDB();
+    await Users.insertMany(usersData);
 
-  await Tech.insertMany(techData);
+    console.log('Users collection seeded in mongoDB!');
+    process.exit(0);
 
-  console.log('Technologies seeded!');
-  process.exit(0);
+  } catch (error: unknown) {
+
+    if (error instanceof Error) {
+      console.error('Error seeding database:', error.message);
+    } else {
+      console.error('Unknown error seeding database');
+    }
+    process.exit(1);
+  }
+  
 });
