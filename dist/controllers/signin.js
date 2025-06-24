@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User, Asset } from '../models/index.js'; // Asegúrate de importar bien
+import { NoSQLUser, NoSQLAsset } from '../models/NoSQLSchema.js'; // Importa tus modelos de Mongoose
 import dotenv from 'dotenv';
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || '';
@@ -15,25 +15,25 @@ export const signin = async (req, res) => {
     try {
         const { user_name, user_lastname, email, password } = req.body;
         // ¿Ya existe ese email?
-        const existingUser = await User.findOne({ where: { email } });
+        const existingUser = await NoSQLUser.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: 'Email already registered' });
         }
         // Hashear la contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
-        // Crear el usuario
-        const newUser = await User.create({
+        const user = new NoSQLUser({
             user_name,
             user_lastname,
             email,
-            password: hashedPassword,
+            password: hashedPassword
         });
-        // Crear un valor en la tabla con el id del usuario
-        const newAsset = await Asset.create({
-            user_id: newUser.id,
+        await user.save();
+        const asset = new NoSQLAsset({
+            user_id: user._id, // Usar el _id de Mongoose
             asset_link: asset_list[num]
         });
-        const token = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: '1h' });
+        await asset.save();
+        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
         res.status(201).json({ message: 'User created successfully', token, user_email: email, user_name: user_name, user_last_name: user_lastname });
     }
     catch (err) {

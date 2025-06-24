@@ -1,9 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import routes from './routes/index.js';
-import { sequelize } from './config/connections.js';
-import './models/index.js';
 import dotenv from 'dotenv';
+import mongoose_connect from './config/connections.js';
 dotenv.config();
 const app = express();
 const PORT = 3001;
@@ -18,14 +17,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(routes);
 // Rutas de ejemplo
-const db_connection = async () => {
-    try {
-        await sequelize.sync({});
-        console.log(`Successfully connected to digtal_twin_db database...`);
-    }
-    catch (error) {
-        console.error(`Unable to connect to the data base. Error: ${error}`);
-    }
+const mongoose_db = async () => {
+    mongoose_connect.once('open', () => {
+        console.log(`Connected to MongoDB database at ${mongoose_connect.host}:${mongoose_connect.port}`);
+    });
 };
 const server_init = async () => {
     try {
@@ -40,5 +35,5 @@ const server_init = async () => {
         console.error(`Unable to start backend service. Error: ${error}`);
     }
 };
-await db_connection();
+await mongoose_db();
 await server_init();

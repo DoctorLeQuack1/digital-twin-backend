@@ -1,7 +1,7 @@
 
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import { User, Asset } from '../models/index.js';
+import { NoSQLAsset, NoSQLUser} from '../models/NoSQLSchema.js';
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || '';
@@ -16,16 +16,13 @@ export const fetch_glb = async (req: any, res: any) => {
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET || '5up3R_54f3_P4a55W0rD#1_3@2$4%3^5&0*8(9)7'); // usa tu secret aquí
 
-        const user = await User.findOne({
-            where: { email : user_email },
-            attributes: ['id'] // Solo traer el id
-        });
+        const user = await NoSQLUser.findOne({ email : user_email });
 
         if (user) {
-            const asset_list = await Asset.findAll({
-                where: { user_id : user.id}
+            const asset_link = await NoSQLAsset.findOne({
+                user_id : user.id
             });
-            return res.status(200).json({ valid: true, asset: asset_list[0]});
+            return res.status(200).json({ valid: true, asset: asset_link });
         } else {
             return res.status(200).json({ valid: true, asset: undefined});
         }

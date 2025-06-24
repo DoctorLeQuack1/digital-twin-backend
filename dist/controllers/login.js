@@ -1,13 +1,13 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/index.js';
 import dotenv from 'dotenv';
+import { NoSQLUser } from '../models/NoSQLSchema.js'; // Importa tus modelos de Mongoose
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || '';
 export const login = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await User.findOne({ where: { email } });
+        const user = await NoSQLUser.findOne({ email: email });
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
