@@ -11,7 +11,7 @@ const typeDefs = `
 
   type Auth {
     token: ID!
-    users: Users
+    user: Users!
   }
 
   input UsersInput {

@@ -7,7 +7,10 @@ import usersData from './usersData.json' with { type: "json" };
 db.once('open', async () => {
   try {
     await cleanDB();
-    await Users.insertMany(usersData);
+
+    for (const user of usersData) {
+      await Users.create(user);
+    }
 
     console.log('Users collection seeded in mongoDB!');
     process.exit(0);
