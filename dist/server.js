@@ -20,7 +20,10 @@ const startApolloServer = async () => {
     await server.start();
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
-    app.use(cors());
+    app.use(cors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+    }));
     app.use('/graphql', expressMiddleware(server, {
         context: authenticateToken
     }));

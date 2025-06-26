@@ -20,7 +20,7 @@ export const addUser = async (input: any) => {
         const existingUser = await Users.findOne({ email: input.email });
 
         if (existingUser) {
-            return  { status: 400, message: 'Email already registered' };
+            throw new Error('Email already registered');
         }
         input.asset = asset_list[num];
         const users = await Users.create({ ...input });
@@ -28,6 +28,6 @@ export const addUser = async (input: any) => {
         return { users };
 
     } catch (err: any) {
-        return { status: 500, message: 'Server error', error: err.message };
+        throw new Error(`Server error: ${err.message}`);
     }
 };

@@ -25,7 +25,7 @@ const startApolloServer = async () => {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cors({
-    origin: 'http://localhost:5173', // or the specific localhost port you want to allow
+    origin: 'http://localhost:5173',
     credentials: true,
   }));
   
