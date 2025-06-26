@@ -24,7 +24,10 @@ const startApolloServer = async () => {
   
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
-  app.use(cors());
+  app.use(cors({
+    origin: 'http://localhost:5173', // or the specific localhost port you want to allow
+    credentials: true,
+  }));
   
 app.use('/graphql', expressMiddleware(server as any,
     {
