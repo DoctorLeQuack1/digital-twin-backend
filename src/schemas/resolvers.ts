@@ -99,7 +99,7 @@ const resolvers = {
     removeUser: async (_parent: unknown, _args: unknown, context: Context): Promise<IUsers | string | null> => {
       if (context.user) {
         // If context has a `user` property, delete the Users of the logged-in user
-        return await Users.findOneAndDelete({ _id: context.user._id });
+        return await Users.findOneAndDelete({ email: context.user.email });
       }
       // If user attempts to execute this mutation and isn't logged in, throw an error
       throw new AuthenticationError('Could not find user');
