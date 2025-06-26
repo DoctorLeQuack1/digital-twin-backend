@@ -32,7 +32,7 @@ const typeDefs = `
     login(email: String!, password: String!): Auth
 
     addAsset(userId: ID!, asset: String!): Users
-    removeUser(id: ID!): Users
+    removeUser(email: String!): Users
   }
 `;
 
