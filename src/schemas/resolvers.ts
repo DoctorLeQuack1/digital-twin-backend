@@ -1,6 +1,7 @@
 import { Users } from '../models/index.js';
 import { signToken, AuthenticationError } from '../utils/auth.js';
 import { IUsers } from '../models/User.js';
+import { addUser } from '../helpers/addUser.js';
 
 // interface Users {
 //     _id: string;
@@ -25,10 +26,6 @@ interface AddUsersArgs {
   }
 };
 
-interface AddAssetArgs {
-  userId: string;
-  asset: string;
-}
 
 interface Context {
   user?: IUsers
@@ -48,21 +45,38 @@ const resolvers = {
       // If not authenticated, throw an authentication error
       throw new AuthenticationError('Not Authenticated');
     },
+
+    getAsset: async (_parent: unknown, _args: unknown, context: Context): Promise<string | null> => {
+      if (!context.user) {
+        throw new AuthenticationError('Not Authenticated');
+      }
+      const user = await Users.findOne({ _id: context.user._id });
+      if (!user) {
+        throw new AuthenticationError('User not found');
+      }
+      return user.asset;
+  }
   },
   
   Mutation: {
-    addUser: async (_parent: unknown, { input }: AddUsersArgs): Promise<{ token: string; users: any }> => {
-      const users = await Users.create({ ...input });
-      const token = signToken(users.name, users.email, users._id);
-
-      return { token, users }
+    addUser: async (_parent: unknown, { input }: AddUsersArgs): Promise<login> => {
+      const result = await addUser(input);
+      // Check if result contains a user object
+      if ('users' in result && result.users) {
+        const user = result.users;
+        const token = signToken(user.name, user.email, user._id);
+        return { token, user };
+      } else {
+        // If addUser returned an error object, throw an error
+        throw new AuthenticationError('Not Authenticated');
+      }
     },
 
-    login: async (_parent: unknown, { email, password }: { email: string; password: string }): Promise<login> => {
+    login: async (_parent: unknown, { email, password }: { email: string; password: string }): Promise<login | string> => {
       // Find a user by email
       const user: IUsers = await Users.findOne({ email }) as IUsers;
       
-      if (!user) {
+      if (!user) { 
         // If profile with provided email doesn't exist, throw an authentication error
         throw new AuthenticationError('Not Authenticated');
       }
@@ -82,25 +96,7 @@ const resolvers = {
       return { token, user };
     },
 
-    addAsset: async (_parent: unknown, { userId, asset }: AddAssetArgs, context: Context): Promise<IUsers | null> => {
-      // If context has a `user` property, that means the user executing this mutation has a valid JWT and is logged in
-      if (context.user) {
-        // Add a skill to a profile identified by profileId
-        return await Users.findOneAndUpdate(
-          { _id: userId },
-          {
-            $set: { asset: asset },
-          },
-          {
-            new: true,
-            runValidators: true,
-          }
-        );
-      }
-      // If user attempts to execute this mutation and isn't logged in, throw an error
-      throw new AuthenticationError('Could not find user');
-    },
-    removeUser: async (_parent: unknown, _args: unknown, context: Context): Promise<IUsers | null> => {
+    removeUser: async (_parent: unknown, _args: unknown, context: Context): Promise<IUsers | string | null> => {
       if (context.user) {
         // If context has a `user` property, delete the Users of the logged-in user
         return await Users.findOneAndDelete({ _id: context.user._id });

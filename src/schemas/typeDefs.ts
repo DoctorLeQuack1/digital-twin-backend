@@ -24,6 +24,7 @@ const typeDefs = `
   type Query {
     users: [Users]
     me: Users
+    getAsset: String
   }
 
   type Mutation {
