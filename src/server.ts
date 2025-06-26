@@ -1,45 +1,43 @@
 import express from 'express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { authenticateToken } from './utils/auth.js';
 import cors from 'cors';
-import routes from './routes/index.js'
-import dotenv from 'dotenv';
-import mongoose_connect from './config/connections.js';
-dotenv.config();
 
+import { typeDefs, resolvers } from './schemas/index.js'; //Create this folder
+import db from './config/connections.js';
+
+const PORT = process.env.PORT || 3001;
 const app = express();
-const PORT = 3001;
-
-
-// Permitir solo tu frontend
-app.use(cors({
-  origin: 'https://woof-quest.web.app', // <-- Cambia esto según dónde corra tu frontend
-  credentials: true // Si vas a enviar cookies o headers de autenticación
-}));
-
-// Otros middlewares
-// Serves static files in the entire client's dist folder
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(routes);
-// Rutas de ejemplo
-
-const mongoose_db = async () => {
-  mongoose_connect.once('open', () => {
-    console.log(`Connected to MongoDB database at ${mongoose_connect.host}:${mongoose_connect.port}`);
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+});
+const connection_db = async () => {
+  db.once('open', () => {
+    console.log('Connected to MongoDB');
   });
 };
 
-const server_init = async () => {
-  try {
-    await new Promise<void>((resolve, reject) => {
-      app.listen(PORT, () => {
-        console.log(`Backend server running on http://localhost:${PORT}...`);
-        resolve();
-      });
-    });
-  } catch (error) {
-    console.error(`Unable to start backend service. Error: ${error}`);
-  }
+const startApolloServer = async () => {
+  await server.start();
+  
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
+  app.use(cors());
+  
+app.use('/graphql', expressMiddleware(server as any,
+    {
+      context: authenticateToken as any
+    }
+  ));
+
+  app.listen(PORT, () => {
+    console.log(`API server running on port ${PORT}!`);
+    console.log(`Use GraphQL at http://localhost:${PORT}/graphql`);
+  });
 };
 
-await mongoose_db();
-await server_init();
+await connection_db();
+await startApolloServer();
+

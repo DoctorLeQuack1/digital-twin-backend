@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
 
-// Wrap Mongoose around local connection to MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/local_digital_twin');
+mongoose.connect(process.env.MONGODB_URI || '');
 
-// Export connection
-export default mongoose.connection;
+const db = mongoose.connection;
+
+export default db;

@@ -1,0 +1,23 @@
+[
+  {
+    "email": "luis@gmail.com",
+    "password": "password",
+    "name": "Luis",
+    "last_name": "Res",
+    "asset": "google.com"
+  },
+  {
+    "email": "serge@gmail.com",
+    "password": "password",
+    "name": "Sergio",
+    "last_name": "Agu",
+    "asset": "x.com"
+  },
+  {
+    "email": "andres@gmail.com",
+    "password": "password",
+    "name": "Andres",
+    "last_name": "Ubi",
+    "asset": "uber.com"
+  }
+]
