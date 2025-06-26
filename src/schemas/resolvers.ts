@@ -18,7 +18,7 @@ interface login {
 }
 
 interface AddUsersArgs {
-  input:{
+  input: {
     email: string;
     password: string;
     name: string;
@@ -55,9 +55,9 @@ const resolvers = {
         throw new AuthenticationError('User not found');
       }
       return user.asset;
-  }
+    }
   },
-  
+
   Mutation: {
     addUser: async (_parent: unknown, { input }: AddUsersArgs): Promise<login> => {
       const result = await addUser(input);
@@ -75,12 +75,12 @@ const resolvers = {
     login: async (_parent: unknown, { email, password }: { email: string; password: string }): Promise<login | string> => {
       // Find a user by email
       const user: IUsers = await Users.findOne({ email }) as IUsers;
-      
-      if (!user) { 
+
+      if (!user) {
         // If profile with provided email doesn't exist, throw an authentication error
         throw new AuthenticationError('Not Authenticated');
       }
-      
+
       // Check if the provided password is correct
       const correctPw = await user.isCorrectPassword(password);
       console.log(correctPw);
@@ -92,16 +92,15 @@ const resolvers = {
 
       // Sign a JWT token for the authenticated profile
       const token = signToken(user.name, user.email, user._id);
-     console.log(user);
+      console.log(user);
       return { token, user };
     },
 
-    removeUser: async (_parent: unknown, _args: unknown, context: Context): Promise<IUsers | string | null> => {
-      if (context.user) {
-        // If context has a `user` property, delete the Users of the logged-in user
-        return await Users.findOneAndDelete({ email: context.user.email });
+    removeUser: async (_parent: unknown, { email }: { email: string }): Promise<IUsers | string | null> => {
+      const deletedUser = await Users.findOneAndDelete({ email });
+      if (deletedUser) {
+        return deletedUser;
       }
-      // If user attempts to execute this mutation and isn't logged in, throw an error
       throw new AuthenticationError('Could not find user');
     },
   },
